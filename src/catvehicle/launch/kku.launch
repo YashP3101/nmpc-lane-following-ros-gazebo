@@ -1,0 +1,7 @@
+<launch>
+    <!-- Launch Gazebo world -->
+    <include file="$(find carbot_gazebo)/launch/carbot_world.launch"/>
+
+    <!-- Run the sequence script -->
+    <node pkg="catvehicle" type="nav.bash" name="nav" output="screen"/>
+</launch>
