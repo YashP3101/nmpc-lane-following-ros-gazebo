@@ -20,11 +20,12 @@ The workspace is organized into modular ROS packages handling dynamics, sensor s
 
 ## Technical Highlights
 
-* **Formulation**: CasADi-based direct multiple shooting with IPOPT solver for constrained finite-time optimal control.
-* **Numerical Integration**: Fourth-order Runge-Kutta (RK4) discretization for high-fidelity multi-step state prediction[cite: 1].
-* **Control Budget**: Deterministic execution operating well within hard real-time cycle deadlines (< 50 ms solve time).
-* **Kinematics**: Kinematic bicycle model with non-holonomic constraints and state boundary conditions[cite: 1].
-  * **Velocity & Limits**: Constant longitudinal velocity ($v = 10\text{ m/s}$) with front-wheel steering input saturation ($\delta \in [-0.6, 0.6]\text{ rad}$)[cite: 1].
+* **Formulation**: CasADi-based constrained nonlinear optimal control formulation with the IPOPT interior-point solver, solved at 10 Hz over a 20-step prediction horizon and 15-step control horizon (sampling time $T_s = 0.1$ s).
+* **Numerical Integration**: Fourth-order Runge-Kutta (RK4) discretization for high-fidelity multi-step state prediction, implemented as an equality constraint within the CasADi optimization.
+* **Control Budget**: NMPC solver averaged ~47 ms per control cycle, comfortably within the 100 ms real-time budget imposed by the 10 Hz control loop.
+* **Kinematics**: Kinematic bicycle model with non-holonomic constraints and state boundary conditions.
+  * **Velocity & Limits**: Constant longitudinal velocity ($v = 10\text{ m/s}$) with front-wheel steering input saturation ($\delta \in [-0.6, 0.6]\text{ rad}$).
+* **Perception Pipeline**: Reused the existing LiDAR-camera sensor fusion pipeline (white-point filtering, DBSCAN clustering, RANSAC line fitting) from the prior baseline framework. Since the raw slope/intercept outputs were noisy frame-to-frame, an Exponential Moving Average (EMA) filter was added and fine-tuned on top of the existing pipeline to stabilize the lane-boundary estimates before feeding them to the controller.
 
 ---
 
@@ -166,4 +167,4 @@ rosrun catvehicle open_plot.py
 ### Acknowledgments
 
 * **Simulation Framework & Dynamics:** Vehicle simulation models and Gazebo dynamics adapt components from the open-source CATVehicle testbed (Rahul Bhadani et al., University of Arizona).
-* **Baseline Framework:** Built upon the perception and baseline Pure Pursuit Controller stack developed by Krishna Gopal Kundu (*Robust Lane Detection and Navigation for Autonomous Vehicles with Sensor Fusion*, 2024).
+* **Baseline Framework:** Built upon the perception pipeline and baseline Pure Pursuit Controller stack developed by Krishna Gopal Kundu (*Robust Lane Detection and Navigation for Autonomous Vehicles with Sensor Fusion*, 2024). This thesis retains that perception pipeline unchanged in its core algorithms, replaces the Pure Pursuit Controller with the NMPC described above, and adds an EMA filtering stage to stabilize the perception output.
